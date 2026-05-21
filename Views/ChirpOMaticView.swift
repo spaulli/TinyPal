@@ -12,6 +12,8 @@ struct ChirpOMaticView: View {
     @State private var timer: Timer? = nil
     @State private var successCount = 0
     @State private var showWinState = false
+    @State private var activeTile: Int? = nil
+    @State private var lastTapDate = Date()
     
     let tiles = [
         TileInfo(id: 0, color: .red, hex: "#e91e63", x: -45, note: "C"),

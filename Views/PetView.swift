@@ -180,19 +180,20 @@ struct PearBodyPath: Shape {
         let w = rect.width
         let h = rect.height
         
-        path.move(to: CGPoint(x: w * 0.5, y: 0))
-        path.addCurve(to: CGPoint(x: w, y: h * 0.8),
-                      control1: CGPoint(x: w * 0.8, y: 0),
-                      control2: CGPoint(x: w, y: h * 0.4))
+        // Match Preview.html: d="M 50 35 C 70 35, 95 65, 95 90 C 95 105, 75 110, 50 110 C 25 110, 5 105, 5 90 C 5 65, 30 35, 50 35"
+        path.move(to: CGPoint(x: w * 0.5, y: h * 0.32)) // M 50 35 (scaled)
+        path.addCurve(to: CGPoint(x: w * 0.95, y: h * 0.82),
+                      control1: CGPoint(x: w * 0.7, y: h * 0.32),
+                      control2: CGPoint(x: w * 0.95, y: h * 0.59)) // C ... 95 90
         path.addCurve(to: CGPoint(x: w * 0.5, y: h),
-                      control1: CGPoint(x: w, y: h),
-                      control2: CGPoint(x: w * 0.75, y: h))
-        path.addCurve(to: CGPoint(x: 0, y: h * 0.8),
+                      control1: CGPoint(x: w * 0.95, y: h * 0.95),
+                      control2: CGPoint(x: w * 0.75, y: h)) // C ... 50 110
+        path.addCurve(to: CGPoint(x: w * 0.05, y: h * 0.82),
                       control1: CGPoint(x: w * 0.25, y: h),
-                      control2: CGPoint(x: 0, y: h))
-        path.addCurve(to: CGPoint(x: w * 0.5, y: 0),
-                      control1: CGPoint(x: 0, y: h * 0.4),
-                      control2: CGPoint(x: w * 0.2, y: 0))
+                      control2: CGPoint(x: w * 0.05, y: h * 0.95)) // C ... 5 90
+        path.addCurve(to: CGPoint(x: w * 0.5, y: h * 0.32),
+                      control1: CGPoint(x: w * 0.05, y: h * 0.59),
+                      control2: CGPoint(x: w * 0.3, y: h * 0.32)) // C ... 
         return path
     }
 }

@@ -32,6 +32,10 @@ class AudioManager {
         playSound(named: "chirp", ext: "wav")
     }
     
+    func playCrackleSound() {
+        playSound(named: "crackle", ext: "wav")
+    }
+    
     private func playSound(named name: String, ext: String) {
         guard let url = Bundle.main.url(forResource: name, withExtension: ext) else { return }
         do {

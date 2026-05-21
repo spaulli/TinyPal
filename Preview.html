@@ -742,6 +742,136 @@
             100% { transform: translateY(0) rotate(360deg) scale(1); }
         }
 
+        /* Herbivore Harvest: Pip's New Game */
+        .falling-item {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .falling-leaf {
+            animation: leaf-fall 3s linear forwards;
+        }
+
+        @keyframes leaf-fall {
+            0% { transform: translateY(-50px) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            50% { transform: translateY(150px) translateX(20px) rotate(180deg); }
+            100% { transform: translateY(400px) translateX(-10px) rotate(360deg); opacity: 0; }
+        }
+
+        .falling-berry {
+            animation: berry-fall 2.5s linear forwards;
+            filter: drop-shadow(0 0 5px #ff3b30);
+        }
+
+        @keyframes berry-fall {
+            0% { transform: translateY(-50px); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(400px); opacity: 0; }
+        }
+
+        .pip-mini-run {
+            position: absolute;
+            bottom: 10px;
+            width: 80px;
+            height: 80px;
+            animation: pip-mini-runner 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes pip-mini-runner {
+            0% { left: 10px; transform: scaleX(1); }
+            45% { transform: scaleX(1); }
+            55% { transform: scaleX(-1); }
+            100% { left: 230px; transform: scaleX(-1); }
+        }
+
+        /* End Herbivore Harvest */
+
+        /* Cosy Cave: Bramble's New Game */
+        .cave-fire-flicker {
+            animation: c-flicker 4s infinite alternate ease-in-out;
+        }
+
+        @keyframes c-flicker {
+            0% { background: linear-gradient(to bottom, #1a1a1a, #4a2c1a); }
+            100% { background: linear-gradient(to bottom, #2a1a1a, #6a3c1a); }
+        }
+
+        .cave-log {
+            width: 90px;
+            height: 24px;
+            background: #4b2c1a;
+            border-radius: 12px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .flame-mid {
+            animation: f-flicker-o 0.7s infinite alternate ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        .log-glow-pulse {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.6) 0%, rgba(255, 69, 0, 0) 75%);
+            filter: blur(8px);
+            animation: l-pulse 0.8s infinite alternate ease-in-out;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #campfire.active .log-glow-pulse {
+            opacity: 1;
+        }
+
+        .flame-outer {
+            animation: f-flicker-o 0.5s infinite alternate ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        @keyframes f-flicker-o {
+            0% { transform: scale(1) skewX(2deg); opacity: 0.7; }
+            100% { transform: scale(1.1) skewX(-2deg); opacity: 1; }
+        }
+
+        .flame-inner {
+            animation: f-flicker-i 0.3s infinite alternate ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        @keyframes f-flicker-i {
+            0% { transform: scale(1) translateY(2px); }
+            100% { transform: scale(1.2) translateY(-2px); }
+        }
+
+        #campfire.active #fireVisual {
+            transform: scale(1.4);
+        }
+
+        @keyframes l-pulse {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .cave-warmth-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 69, 0, 0);
+            pointer-events: none;
+            transition: background 1s ease;
+            z-index: 2;
+        }
+
+        /* End Cosy Cave */
+
         .nova-melt {
             animation: nova-m 3s infinite alternate ease-in-out;
         }
@@ -1472,12 +1602,30 @@
                 style="position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; font-size: 18px; background: rgba(255,255,255,0.7); color: black; border-radius: 50%; border: none; z-index: 20; display: flex; align-items: center; justify-content: center; line-height: 1; cursor: pointer;"
                 onclick="closeGame()">←</button>
 
-            <!-- Peek-a-boo Area -->
-            <div id="peekabooArea" class="hidden"
-                style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; cursor:pointer;"
-                onclick="peekReveal()">
-                <div id="peekPetContainer" class="character-container">
-                    <div id="peekPetArt" class="pet-art pet-art-inner"></div>
+            <!-- Cosy Cave (Bramble) -->
+            <div id="caveArea" class="hidden cave-fire-flicker"
+                style="position:absolute; top:0; left:0; width:100%; height:100%; overflow:hidden;">
+                
+                <div id="caveWarmth" class="cave-warmth-overlay" 
+                    style="background: linear-gradient(to top, rgba(255, 69, 0, 0) 0%, rgba(255, 69, 0, 0) 100%);"></div>
+                
+                <div id="cavePetArt" class="character-container" style="top:40%; transition: transform 0.5s ease;"></div>
+                
+                <div id="campfire" onclick="stokeLog()" 
+                    style="position:absolute; bottom:15px; left:65%; margin-left:-50px; width:100px; height:80px; z-index:15; cursor:pointer;">
+                    
+                    <!-- Fire SVG -->
+                    <svg id="fireVisual" viewBox="0 0 100 100" style="position:absolute; bottom:20px; left:10px; width:80px; height:80px; overflow:visible; filter: drop-shadow(0 0 8px rgba(255,100,0,0.6)); transition: transform 0.3s ease;">
+                        <path class="flame-outer" d="M50,10 Q70,40 50,90 Q30,40 50,10" fill="#ff4500" opacity="0.7" />
+                        <path class="flame-mid" d="M50,20 Q65,45 50,88 Q35,45 50,20" fill="#ff8c00" opacity="0.8" />
+                        <path class="flame-inner" d="M50,35 Q60,55 50,85 Q40,55 50,35" fill="#ffcc00" opacity="0.9" />
+                    </svg>
+
+                    <div class="log-glow-pulse" style="width:120px; height:100px; left:-10px; top:-10px;"></div>
+                    <!-- Larger Teepee Logs -->
+                    <div class="cave-log" style="position:absolute; bottom:0; left:5px; transform: rotate(-30deg);"></div>
+                    <div class="cave-log" style="position:absolute; bottom:0; right:5px; transform: rotate(30deg);"></div>
+                    <div class="cave-log" style="position:absolute; bottom:2px; left:5px; width:90px; z-index:2;"></div>
                 </div>
             </div>
 
@@ -1495,6 +1643,12 @@
                     <button class="music-tile" style="background:#ffa502; color:#ffa502;"
                         onclick="chirpTile(2, 'G')"></button>
                 </div>
+            </div>
+
+            <!-- Herbivore Harvest (Pip) -->
+            <div id="harvestArea" class="hidden"
+                style="width:100%; height:100%; position:absolute; top:0; left:0; overflow:hidden; background: linear-gradient(to bottom, #1a1a1a, #145214);">
+                <div id="pipGameRunner" class="pip-mini-run"></div>
             </div>
 
             <div id="bubbleCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
@@ -2185,18 +2339,27 @@
 
             if (isBramble) {
                 canvas.classList.add('hidden');
-                peekArea.classList.remove('hidden');
+                document.getElementById('caveArea').classList.remove('hidden');
                 chirpArea.classList.add('hidden');
-                startPeekaboo();
+                document.getElementById('harvestArea').classList.add('hidden');
+                startCosyCave();
             } else if (isTweek) {
                 canvas.classList.add('hidden');
                 peekArea.classList.add('hidden');
                 chirpArea.classList.remove('hidden');
+                document.getElementById('harvestArea').classList.add('hidden');
                 startChirpGame();
+            } else if (pets[petIndex].id === 'pip') {
+                canvas.classList.add('hidden');
+                peekArea.classList.add('hidden');
+                chirpArea.classList.add('hidden');
+                document.getElementById('harvestArea').classList.remove('hidden');
+                startPipGame();
             } else {
                 canvas.classList.remove('hidden');
                 peekArea.classList.add('hidden');
                 chirpArea.classList.add('hidden');
+                document.getElementById('harvestArea').classList.add('hidden');
                 startBubbles();
             }
         }
@@ -2283,74 +2446,116 @@
             }, 2000);
         }
 
-        let peekState = 'hiding';
-        function startPeekaboo() {
-            peekState = 'hiding';
-            const container = document.getElementById('peekPetArt');
+        let stokeCount = 0;
+        let cosyInterval;
+        let decayTimer;
+
+        function startCosyCave() {
+            const container = document.getElementById('cavePetArt');
             if (container) {
                 container.innerHTML = getPetSVG('bramble');
             }
-            const art = document.querySelector('#peekPetArt .pet-art');
-            const eyes = document.querySelectorAll('#peekPetArt .eye-shape');
-            const armsL = document.querySelector('#peekPetArt .bramble-arm-l');
-            const armsR = document.querySelector('#peekPetArt .bramble-arm-r');
+            stokeCount = 0;
+            updateCaveLighting();
+            
+            // Clear active state
+            const campfire = document.getElementById('campfire');
+            if (campfire) campfire.classList.remove('active');
 
-            // Set Initial Hide State
-            armsL.style.transform = 'rotate(160deg) translate(20px, -20px)';
-            armsR.style.transform = 'rotate(-160deg) translate(-20px, -20px)';
-            eyes.forEach(e => e.style.transform = 'scaleY(0.1)');
-            art.style.transform = 'scale(0.8)';
+            // Reset Fire
+            const fireVisual = document.getElementById('fireVisual');
+            if (fireVisual) {
+                fireVisual.innerHTML = `
+                    <path class="flame-outer" d="M50,10 Q70,40 50,90 Q30,40 50,10" fill="#ff4500" opacity="0.7" />
+                    <path class="flame-mid" d="M50,20 Q65,45 50,88 Q35,45 50,20" fill="#ff8c00" opacity="0.8" />
+                    <path class="flame-inner" d="M50,35 Q60,55 50,85 Q40,55 50,35" fill="#ffcc00" opacity="0.9" />
+                `;
+            }
 
-            // Loop muffled giggle (simulated)
-            this.peekInterval = setInterval(() => {
-                if (peekState === 'hiding') console.log("[SFX] Muffled Giggle");
-            }, 4000);
+            if (cosyInterval) clearInterval(cosyInterval);
+            cosyInterval = setInterval(spawnLogGlow, 1500);
+
+            if (decayTimer) clearInterval(decayTimer);
+            decayTimer = setInterval(decayFire, 5000);
         }
 
-        function peekReveal() {
-            if (peekState !== 'hiding') return;
-            peekState = 'revealed';
+        function updateCaveLighting() {
+            const warmth = document.getElementById('caveWarmth');
+            if (!warmth) return;
+            const radius = Math.min(100, stokeCount * 15);
+            const intensity = stokeCount * 0.12;
+            warmth.style.background = `radial-gradient(circle at 65% 85%, rgba(255, 69, 0, ${intensity}) 0%, rgba(255, 69, 0, 0) ${radius}%)`;
+        }
 
-            const container = document.getElementById('peekPetContainer');
-            const art = container.querySelector('.pet-art');
-            const eyes = container.querySelectorAll('.eye-shape');
-            const armsL = container.querySelector('.bramble-arm-l');
-            const armsR = container.querySelector('.bramble-arm-r');
+        function decayFire() {
+            if (stokeCount <= 0) return;
+            
+            stokeCount--;
+            const fireVisual = document.getElementById('fireVisual');
+            if (fireVisual && fireVisual.children.length > 3) {
+                fireVisual.removeChild(fireVisual.lastElementChild);
+            }
 
-            // Snap Open
-            armsL.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            armsR.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            armsL.style.transform = 'rotate(-20deg)';
-            armsR.style.transform = 'rotate(20deg)';
+            updateCaveLighting();
+            console.log("[Bramble] Fire decaying! Count: " + stokeCount);
+        }
 
-            eyes.forEach(e => {
-                e.style.transition = 'transform 0.1s';
-                e.style.transform = 'scaleY(1.2) scaleX(1.1)';
-            });
+        function spawnLogGlow() {
+            const campfire = document.getElementById('campfire');
+            if (!campfire) return;
 
-            art.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            art.style.transform = 'scale(1.0)';
+            const area = document.getElementById('caveArea');
+            if (area.classList.contains('hidden')) {
+                if (cosyInterval) clearInterval(cosyInterval);
+                return;
+            }
 
-            console.log("[SFX] PEEK-A-BOO!");
-            stats.happiness = Math.min(100, stats.happiness + 15);
+            // Pulse the whole campfire
+            campfire.classList.add('active');
+            
+            setTimeout(() => {
+                campfire.classList.remove('active');
+            }, 1100);
+        }
+
+        function stokeLog() {
+            const campfire = document.getElementById('campfire');
+            if (!campfire || !campfire.classList.contains('active')) return;
+
+            campfire.classList.remove('active');
+            stokeCount++;
+            
+            // Add a new flame layer
+            const fireVisual = document.getElementById('fireVisual');
+            if (fireVisual) {
+                const newFlame = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const offset = (Math.random() - 0.5) * 20;
+                newFlame.setAttribute("d", `M${50+offset},${15+Math.random()*20} Q${65+offset},50 ${50+offset},90 Q${35+offset},50 ${50+offset},15`);
+                newFlame.setAttribute("fill", stokeCount % 2 === 0 ? "#ff8c00" : "#ffcc00");
+                newFlame.setAttribute("opacity", "0.8");
+                newFlame.classList.add(stokeCount % 2 === 0 ? "flame-outer" : "flame-inner");
+                fireVisual.appendChild(newFlame);
+            }
+
+            // Reset Decay
+            if (decayTimer) clearInterval(decayTimer);
+            decayTimer = setInterval(decayFire, 5000);
+
+            // Update Lighting
+            updateCaveLighting();
+
+            console.log("[Bramble] Stoke: " + stokeCount + "/7");
+            stats.happiness = Math.min(100, stats.happiness + 8);
             synchronizeUI();
 
-            // Auto Reset after 3s
-            setTimeout(() => {
-                peekState = 'hiding';
-                const container = document.getElementById('peekPetArt');
-                const art = container.querySelector('.pet-art-inner');
-                const eyes = container.querySelectorAll('.eye-shape');
-                const armsL = container.querySelector('.bramble-arm-l');
-                const armsR = container.querySelector('.bramble-arm-r');
-
-                armsL.style.transition = 'transform 1s ease-in-out';
-                armsR.style.transition = 'transform 1s ease-in-out';
-                armsL.style.transform = 'rotate(160deg) translate(20px, -20px)';
-                armsR.style.transform = 'rotate(-160deg) translate(-20px, -20px)';
-                eyes.forEach(e => e.style.transform = 'scaleY(0.1)');
-                art.style.transform = 'scale(0.8)';
-            }, 3000);
+            if (stokeCount >= 7) {
+                if (cosyInterval) clearInterval(cosyInterval);
+                if (decayTimer) clearInterval(decayTimer);
+                campfire.classList.remove('active');
+                // Ensure pet is updated and victory dance starts
+                document.getElementById('cavePetArt').innerHTML = getPetSVG('bramble', true);
+                setTimeout(() => { triggerWinCelebration(); }, 500);
+            }
         }
 
         function startBubbles() {
@@ -2420,7 +2625,10 @@
                 activeContainer = document.getElementById('chirpPetContainer');
                 gamePetContainer.classList.add('hidden');
             } else if (petId === 'bramble') {
-                activeContainer = document.getElementById('peekPetContainer');
+                activeContainer = document.getElementById('cavePetArt');
+                gamePetContainer.classList.add('hidden');
+            } else if (petId === 'pip') {
+                activeContainer = document.getElementById('pipGameRunner');
                 gamePetContainer.classList.add('hidden');
             } else {
                 activeContainer = gamePetContainer;
@@ -2469,10 +2677,90 @@
         }
 
         function closeGame() {
+            if (cosyInterval) clearInterval(cosyInterval);
+            if (decayTimer) clearInterval(decayTimer);
             document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('harvestArea').classList.add('hidden');
+            document.getElementById('caveArea').classList.add('hidden');
+            document.getElementById('chirpArea').classList.add('hidden');
+            document.getElementById('bubbleCanvas').classList.add('hidden');
+            isGameActive = false;
+            
+            // Show main screen
             document.getElementById('contentScreen').classList.remove('hidden');
             document.getElementById('floorView').classList.remove('hidden');
             synchronizeUI();
+        }
+
+        // --- Herbivore Harvest (Pip) Logic ---
+        let harvestBerries = 0;
+        let harvestInterval;
+
+        function startPipGame() {
+            const runner = document.getElementById('pipGameRunner');
+            if (runner) {
+                runner.innerHTML = getPetSVG('pip', true);
+                const palette = pets[1].palette || tintCycle; // Pip is index 1
+                runner.style.color = '#a8e6cf';
+            }
+            harvestBerries = 0;
+            const area = document.getElementById('harvestArea');
+            // Clear existing items
+            area.querySelectorAll('.falling-item').forEach(el => el.remove());
+
+            if (harvestInterval) clearInterval(harvestInterval);
+            harvestInterval = setInterval(spawnHerbivoreItem, 800);
+        }
+
+        function spawnHerbivoreItem() {
+            const area = document.getElementById('harvestArea');
+            if (area.classList.contains('hidden')) {
+                clearInterval(harvestInterval);
+                return;
+            }
+
+            const isBerry = Math.random() > 0.6;
+            const item = document.createElement('div');
+            item.className = isBerry ? 'falling-item falling-berry' : 'falling-item falling-leaf';
+            
+            const startX = Math.random() * 280 + 20;
+            item.style.left = startX + 'px';
+            item.style.top = '-40px';
+
+            if (isBerry) {
+                item.innerHTML = `<div style="width:32px; height:32px; background:#ff3b30; border-radius:50%; border:2px solid #fff;"></div>`;
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    collectBerry(item);
+                };
+            } else {
+                item.innerHTML = `<svg viewBox="0 0 100 100" width="20" height="20">
+                    <path d="M50 0 C70 20 90 50 50 100 C10 50 30 20 50 0" fill="#2ecc71" opacity="0.8"/>
+                </svg>`;
+            }
+
+            area.appendChild(item);
+            setTimeout(() => { if (item.parentNode) item.remove(); }, 3500);
+        }
+
+        function collectBerry(el) {
+            if (el.collected) return;
+            el.collected = true;
+            harvestBerries++;
+            
+            // Pop effect
+            el.style.transition = 'transform 0.2s, opacity 0.2s';
+            el.style.transform = 'scale(1.5)';
+            el.style.opacity = '0';
+            
+            console.log("[Pip] Berries: " + harvestBerries + "/4");
+            stats.happiness = Math.min(100, stats.happiness + 15);
+            synchronizeUI();
+
+            if (harvestBerries >= 4) {
+                clearInterval(harvestInterval);
+                setTimeout(() => { triggerWinCelebration(); }, 500);
+            }
         }
 
         function init() {

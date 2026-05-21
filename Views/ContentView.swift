@@ -9,7 +9,8 @@ struct ContentView: View {
     @AppStorage("isInitialized") private var isInitialized = true
     @State private var dummyCrownValue: Double = 0.0
     @State private var showPopView = false
-    @State private var showPeekabooView = false
+    @State private var showCosyCaveView = false
+    @State private var showHerbivoreHarvestView = false
     @State private var showChirpOMaticView = false
     
     // MARK: - Animation State
@@ -99,7 +100,9 @@ struct ContentView: View {
                         
                         Button(action: { 
                             if pet.petType == "Bramble" {
-                                showPeekabooView = true
+                                showCosyCaveView = true
+                            } else if pet.petType == "Pip" {
+                                showHerbivoreHarvestView = true
                             } else if pet.petType == "Tweek" {
                                 showChirpOMaticView = true
                             } else {
@@ -204,8 +207,11 @@ struct ContentView: View {
         .sheet(isPresented: $showPopView) {
             PopView(pet: pet)
         }
-        .sheet(isPresented: $showPeekabooView) {
-            PeekABooView(pet: pet)
+        .sheet(isPresented: $showCosyCaveView) {
+            CosyCaveView(pet: pet)
+        }
+        .sheet(isPresented: $showHerbivoreHarvestView) {
+            HerbivoreHarvestView(pet: pet)
         }
         .sheet(isPresented: $showChirpOMaticView) {
             ChirpOMaticView(pet: pet)
@@ -287,13 +293,33 @@ struct ContentView: View {
         
         let move = pet.petType
         if move == "Bramble" {
-            let anims = ["tummy-pat", "peekaboo", "heavy-tumble", "happy-jive"]
+            let anims = ["bear-hug", "ear-wriggle", "belly-pat", "tumble", "happy-jive"]
             let choice = anims.randomElement()!
             
             let brambleSpring = Animation.spring(response: 0.8, dampingFraction: 0.6)
             
             switch choice {
-            case "tummy-pat":
+            case "bear-hug":
+                withAnimation(brambleSpring) {
+                    armSweep = -140
+                    petScaleX = 1.1
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation(brambleSpring) {
+                        petScaleX = 1.0
+                        armSweep = 0
+                    }
+                    self.isAnimating = false
+                }
+            case "ear-wriggle":
+                withAnimation(.linear(duration: 0.1).repeatCount(10, autoreverses: true)) {
+                    petRotation = 5
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    petRotation = 0
+                    self.isAnimating = false
+                }
+            case "belly-pat":
                 withAnimation(brambleSpring) {
                     armSweep = 60
                     petScaleX = 1.05
@@ -310,39 +336,14 @@ struct ContentView: View {
                         self.isAnimating = false
                     }
                 }
-            case "peekaboo":
-                withAnimation(brambleSpring) {
-                    armSweep = -140
-                    forceSleepyEyes = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    withAnimation(brambleSpring) {
-                        armSweep = 0
-                        forceSleepyEyes = false
-                        showHappyEyes = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        showHappyEyes = false
-                        self.isAnimating = false
-                    }
-                }
-            case "heavy-tumble":
-                withAnimation(.easeInOut(duration: 2.0)) {
+            case "tumble":
+                withAnimation(.easeInOut(duration: 0.8)) {
                     petRotation = 360
+                    jumpOffset = -30
                 }
-                // Squash when half-way (butt touches floor)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation(brambleSpring) {
-                        petScaleY = 0.7
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        withAnimation(brambleSpring) {
-                            petScaleY = 1.0
-                        }
-                    }
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     petRotation = 0
+                    jumpOffset = 0
                     self.isAnimating = false
                 }
             case "happy-jive":
@@ -362,53 +363,24 @@ struct ContentView: View {
             default: break
             }
         } else if move == "Tweek" || move == "Chick" {
-            let anims = ["spin-dry", "peck", "flutter", "waddle", "preen", "startle", "flip"]
+            let anims = ["wing-flutter", "seed-peck", "happy-flip"]
             let choice = anims.randomElement()!
             
             switch choice {
-            case "spin-dry":
-                withAnimation(.linear(duration: 0.05).repeatCount(20, autoreverses: true)) { xOffset = 5; armSweep = 45 }
+            case "wing-flutter":
+                withAnimation(.linear(duration: 0.05).repeatCount(20, autoreverses: true)) { armSweep = 60 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation(.easeInOut) { xOffset = 0; armSweep = 0 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { self.isAnimating = false }
+                    withAnimation(.easeInOut) { armSweep = 0 }
+                    self.isAnimating = false
                 }
-            case "peck":
+            case "seed-peck":
                 withAnimation(.easeInOut(duration: 0.15)) { petRotation = 30; forceO_Mouth = true }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                     AudioManager.shared.playClinkSound()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { petRotation = 0; forceO_Mouth = false }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self.isAnimating = false }
                 }
-            case "flutter":
-                withAnimation(.easeOut(duration: 0.2)) { jumpOffset = -10; faceBlur = 4.0 }
-                withAnimation(.linear(duration: 0.05).repeatCount(20, autoreverses: true)) { armSweep = 60 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    withAnimation(.easeIn(duration: 0.2)) { jumpOffset = 0; faceBlur = 0.0; armSweep = 0 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { self.isAnimating = false }
-                }
-            case "waddle":
-                withAnimation(.linear(duration: 0.15).repeatCount(8, autoreverses: true)) { petRotation = 10; xOffset = 15 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                    withAnimation(.easeInOut) { petRotation = 0; xOffset = 0 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { self.isAnimating = false }
-                }
-            case "preen":
-                withAnimation(.easeInOut(duration: 0.4)) { petRotation = -15; armSweep = -80; forceSleepyEyes = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    withAnimation(.linear(duration: 0.1).repeatCount(6, autoreverses: true)) { armSweep = -60 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        withAnimation(.easeInOut(duration: 0.4)) { petRotation = 0; armSweep = 0; forceSleepyEyes = false }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self.isAnimating = false }
-                    }
-                }
-            case "startle":
-                AudioManager.shared.playPopSound()
-                withAnimation(.spring(response: 0.2, dampingFraction: 0.3)) { petScaleY = 1.3; petScaleX = 0.8; jumpOffset = -20; armSweep = -90; forceO_Mouth = true }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { petScaleY = 1.0; petScaleX = 1.0; jumpOffset = 0; armSweep = 0; forceO_Mouth = false }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { self.isAnimating = false }
-                }
-            case "flip":
+            case "happy-flip":
                 withAnimation(.easeInOut(duration: 0.5)) { jumpOffset = -50; petRotation = -360 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeIn(duration: 0.3)) { jumpOffset = 0 }
@@ -422,37 +394,36 @@ struct ContentView: View {
                 }
             default: break
             }
+            default: break
+            }
         } else if move == "Pip" {
-            let anims = ["tail-wag", "neck-nuzzle", "dino-jump"]
+            let anims = ["spine-ripple", "neck-nuzzle", "dino-jump"]
             let choice = anims.randomElement()!
             
             let pipSpring = Animation.spring(response: 0.8, dampingFraction: 0.6)
             
             switch choice {
-            case "tail-wag":
-                // Slow and deliberate tail wag +/- 10 degrees (body shimmy)
-                withAnimation(pipSpring.repeatCount(4, autoreverses: true)) {
-                    tailRotation = 10
+            case "spine-ripple":
+                withAnimation(.linear(duration: 0.1).repeatCount(10, autoreverses: true)) {
+                    petRotation = 5
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
-                    withAnimation(pipSpring) { tailRotation = 0 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    petRotation = 0
                     self.isAnimating = false
                 }
             case "neck-nuzzle":
-                // Smooth head/neck tilt toward the screen (leaning in for a pet)
                 withAnimation(pipSpring) {
                     neckRotation = -25
+                    petScaleX = 1.05
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     withAnimation(pipSpring) {
                         neckRotation = 0
+                        petScaleX = 1.0
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
-                        self.isAnimating = false
-                    }
+                    self.isAnimating = false
                 }
             case "dino-jump":
-                // Flatten belly (Scale Y: 0.6), Leap, Stretch neck (Scale Y: 1.4)
                 withAnimation(pipSpring) {
                     petScaleY = 0.6
                     petScaleX = 1.3
@@ -481,38 +452,54 @@ struct ContentView: View {
                 }
             default: break
             }
-        } else {
-            let anims = ["leap", "roll", "zoom", "peekaboo"]
+        } else if move == "Nova" {
+            let anims = ["bubble-blast", "glow-pulse", "cosmic-squish"]
             let choice = anims.randomElement()!
             
+            let novaSpring = Animation.spring(response: 0.6, dampingFraction: 0.7)
+            
             switch choice {
-            case "leap":
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { petScaleY = 0.7; petScaleX = 1.3; jumpOffset = 10 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { petScaleY = 1.3; petScaleX = 0.8; jumpOffset = -40 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.4)) { petScaleY = 1.0; petScaleX = 1.0; jumpOffset = 0 }
+            case "bubble-blast":
+                withAnimation(novaSpring) {
+                    petScaleX = 1.3
+                    petScaleY = 1.3
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        petScaleX = 0.8
+                        petScaleY = 0.8
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        withAnimation(novaSpring) {
+                            petScaleX = 1.0
+                            petScaleY = 1.0
+                        }
                         self.isAnimating = false
                     }
                 }
-            case "roll":
-                withAnimation(.interpolatingSpring(stiffness: 50, damping: 5)) { petRotation = 360 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { petRotation = 0; self.isAnimating = false }
-            case "zoom":
-                withAnimation(.easeIn(duration: 0.3)) { xOffset = 250 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    xOffset = -250
-                    withAnimation(.easeOut(duration: 0.4)) { xOffset = 0 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self.isAnimating = false }
+            case "glow-pulse":
+                withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
+                    petScaleX = 1.1
+                    petScaleY = 1.1
                 }
-            case "peekaboo":
-                withAnimation(.interpolatingSpring(stiffness: 60, damping: 6)) { petScaleX = 0.01; petScaleY = 0.01 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    withAnimation(.interpolatingSpring(stiffness: 60, damping: 6)) { petScaleX = 1.0; petScaleY = 1.0 }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { self.isAnimating = false }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    self.isAnimating = false
+                }
+            case "cosmic-squish":
+                withAnimation(novaSpring) {
+                    petScaleX = 1.4
+                    petScaleY = 0.7
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    withAnimation(novaSpring) {
+                        petScaleX = 1.0
+                        petScaleY = 1.0
+                    }
+                    self.isAnimating = false
                 }
             default: break
             }
+        } else {
         }
         
         AudioManager.shared.playGiggleSound()
